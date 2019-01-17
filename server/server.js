@@ -5,12 +5,12 @@ const socketIO = require('socket.io');
 
 // Config variables
 const publicPath = path.join(__dirname, '../public');
-const port = process.env.PORT || 3000;
+const port       = process.env.PORT || 3000;
 
 // Server setup
-const app = express();
-var server = http.createServer(app);
-var io = socketIO(server);
+const app    = express();
+var   server = http.createServer(app);
+var   io     = socketIO(server);
 
 const options = {
     extensions : ['html', 'htm']
@@ -19,10 +19,15 @@ const options = {
 app.use(express.static(publicPath, options));
 
 io.on('connection', socket => {
-    console.log('New user connected');
+    socket.on('createMessage', data => {
+        var date = new Date();
+        date = new Date(date.getTime() - (date.getTimezoneOffset() * 1000 * 60));
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
+        io.emit('newMessage', { 
+            from : data.from,
+            text : data.text,
+            at   : date.toUTCString().replace( / GMT$/, '')
+        });
     });
 });
 
