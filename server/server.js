@@ -12,6 +12,9 @@ const app    = express();
 var   server = http.createServer(app);
 var   io     = socketIO(server);
 
+// Import util functions
+const { generateMessage } = require('./utils/message');
+
 const options = {
     extensions : ['html', 'htm']
 }
@@ -19,25 +22,11 @@ const options = {
 app.use(express.static(publicPath, options));
 
 io.on('connection', socket => {
-    socket.emit('newMessage', {
-        from : 'Admin',
-        text : 'Welcome to the chat!',
-        at   : new Date().getTime()
-    });
-
-    socket.broadcast.emit('newMessage', {
-        from : 'Admin',
-        text : 'A new user joined the chat',
-        at   : new Date().getTime()
-    })
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat'));
+    socket.broadcast.emit('newMessage', generateMessage('Admin', 'A new user joined the chat'));
 
     socket.on('createMessage', data => {
-
-        io.emit('newMessage', { 
-            from : data.from,
-            text : data.text,
-            at   : new Date().getTime()
-        });
+        io.emit('newMessage', generateMessage(data.from, data.text));
     });
 });
 
