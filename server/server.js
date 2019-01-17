@@ -19,14 +19,24 @@ const options = {
 app.use(express.static(publicPath, options));
 
 io.on('connection', socket => {
+    socket.emit('newMessage', {
+        from : 'Admin',
+        text : 'Welcome to the chat!',
+        at   : new Date().getTime()
+    });
+
+    socket.broadcast.emit('newMessage', {
+        from : 'Admin',
+        text : 'A new user joined the chat',
+        at   : new Date().getTime()
+    })
+
     socket.on('createMessage', data => {
-        var date = new Date();
-        date = new Date(date.getTime() - (date.getTimezoneOffset() * 1000 * 60));
 
         io.emit('newMessage', { 
             from : data.from,
             text : data.text,
-            at   : date.toUTCString().replace( / GMT$/, '')
+            at   : new Date().getTime()
         });
     });
 });
